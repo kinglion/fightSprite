@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>css-background</title>
+  <style>
+  	*{ margin:0; padding:0;}
+  	/*sprite切割后每个格子的大小*/
+  	.player{
+  		width:82.5px;
+  		height:62.5px;
+  		position: absolute;
+  		background-image: url(../images/sprite.png);
+  		/*normal状态*/
+  		background-position: 0 -125px;
+  		left: 0px;
+  		right:0px;
+  		top:0px;
+  		bottom:0px;
+  	}
+  	.down-0{
+  		background-position: 0 0;
+  	}
+  	.down-1{
+  		background-position: -82.5px 0;
+  	}
+  	.down-2{
+  		background-position: -165px 0;
+  	}
+  	.down-3{
+  		background-position: -247.5px 0;
+  	}
+  	.left-0{
+  		background-position: 0 -62.5px;
+  	}
+  	.left-1{
+  		background-position: -82.5px -62.5px;
+  	}
+  	.left-2{
+  		background-position: -165px -62.5px;
+  	}
+  	.left-3{
+  		background-position: -247.5px -62.5px;
+  	}
+  	.right-0{
+  		background-position: 0 -125px;
+  	}
+  	.right-1{
+  		background-position: -82.5px -125px;
+  	}
+  	.right-2{
+  		background-position: -165px -125px;
+  	}
+  	.right-3{
+  		background-position: -247.5px -125px;
+  	}
+  	.up-0{
+  		background-position: 0 -187.5px;
+  	}
+  	.up-1{
+  		background-position: -82.5px -187.5px;
+  	}
+  	.up-2{
+  		background-position: -165px -187.5px;
+  	}
+  	.up-3{
+  		background-position: -247.5px -187.5px;
+  	}
+  </style>
+</head>
+<body>
+	<div class="player" id="player"></div>
+	<script>
+		var holdTime = 0,spriteNum = 4,currentSprite = 0;
+
+		var initX = 0,initY = 0;
+		window.onload = function(){
+			document.body.addEventListener('keydown',function(e){
+				holdTime ++;
+				currentSprite = holdTime % spriteNum;
+				switch(e.keyIdentifier){
+					case 'Right':
+						initX += 5;
+						play('right',currentSprite);
+						break;
+					case 'Up':
+						initY -= 5;
+						play('up',currentSprite);
+						break;
+					case 'Down':
+						initY += 5;
+						play('down',currentSprite);
+						break;
+					case 'Left':
+						initX -= 5;
+						play('left',currentSprite);
+						break;
+				}
+				console.log(e.keyIdentifier);
+			});
+			document.body.addEventListener('keyup',function(e){
+				holdTime = 0;
+				release();
+			});
+		}
+		function play(action,num){
+			var player = document.getElementById('player');
+			player.className = 'player';
+			player.classList.add(action+'-'+num);
+			player.style.webkitTransform = 'translate('+initX+'px,'+initY+'px)';
+		}
+		function release(){
+			player.className = player.className.replace(/\d/,'0');
+		}
+	</script>
+</body>
+</html>
