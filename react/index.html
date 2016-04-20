@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>react</title>
+  <style>
+  	*{ margin:0; padding:0;}
+  	/*sprite切割后每个格子的大小*/
+  	.player{
+  		width:82.5px;
+  		height:62.5px;
+  		position: absolute;
+  		background-image: url(../images/sprite.png);
+  		/*normal状态*/
+  		background-position: 0 -125px;
+  		left: 0px;
+  		right:0px;
+  		top:0px;
+  		bottom:0px;
+  	}
+  	.down-0{
+  		background-position: 0 0;
+  	}
+  	.down-1{
+  		background-position: -82.5px 0;
+  	}
+  	.down-2{
+  		background-position: -165px 0;
+  	}
+  	.down-3{
+  		background-position: -247.5px 0;
+  	}
+  	.left-0{
+  		background-position: 0 -62.5px;
+  	}
+  	.left-1{
+  		background-position: -82.5px -62.5px;
+  	}
+  	.left-2{
+  		background-position: -165px -62.5px;
+  	}
+  	.left-3{
+  		background-position: -247.5px -62.5px;
+  	}
+  	.right-0{
+  		background-position: 0 -125px;
+  	}
+  	.right-1{
+  		background-position: -82.5px -125px;
+  	}
+  	.right-2{
+  		background-position: -165px -125px;
+  	}
+  	.right-3{
+  		background-position: -247.5px -125px;
+  	}
+  	.up-0{
+  		background-position: 0 -187.5px;
+  	}
+  	.up-1{
+  		background-position: -82.5px -187.5px;
+  	}
+  	.up-2{
+  		background-position: -165px -187.5px;
+  	}
+  	.up-3{
+  		background-position: -247.5px -187.5px;
+  	}
+  </style>
+</head>
+<body>
+	<div id="main"></div>
+	<!-- The core React library -->
+	<script src="https://fb.me/react-15.0.1.js"></script>
+	<!-- The ReactDOM Library -->
+	<script src="https://fb.me/react-dom-15.0.1.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+	<script type="text/babel">
+		var Player = React.createClass({
+			getInitialState: function() {
+				return {
+					className : 'player',
+					style : {
+						WebkitTransform : "translate(0px,0px)"
+					}
+				}
+			},
+			componentDidMount : function(){
+				var _self = this;
+
+				var holdTime = 0,spriteNum = 4,currentSprite = 0;
+				var initX = 0,initY = 0;
+				document.body.addEventListener('keydown',function(e){
+					holdTime ++;
+					currentSprite = holdTime % spriteNum;
+					switch(e.keyIdentifier){
+						case 'Right':
+							initX += 5;
+							_self.play('right',currentSprite,initX,initY);
+							break;
+						case 'Up':
+							initY -= 5;
+							_self.play('up',currentSprite,initX,initY);
+							break;
+						case 'Down':
+							initY += 5;
+							_self.play('down',currentSprite,initX,initY);
+							break;
+						case 'Left':
+							initX -= 5;
+							_self.play('left',currentSprite,initX,initY);
+							break;
+					}
+				});
+				document.body.addEventListener('keyup',function(e){
+					holdTime = 0;
+					_self.release();
+				});
+			},
+			release : function(){
+				var className = this.state.className.replace(/\d/,'0');
+				var _state = this.state;
+				_state.className = className;
+				this.setState(_state);
+			},
+			play : function(action,num,initX,initY){
+				var className = 'player ' + action+'-'+num;
+				var style = {
+					WebkitTransform : 'translate('+initX+'px,'+initY+'px)'
+				}
+				var _state = this.state;
+				_state.className = className;
+				_state.style = style;
+				this.setState(_state);
+			},
+			render: function() {
+				return (
+				  <div className={this.state.className} style={this.state.style}></div>
+				);
+			}
+		});
+
+
+		ReactDOM.render(
+		<Player />,
+		document.getElementById('main')
+		);
+    </script>
+	<script>
+		/*var stage = document.getElementById('stage');
+	
+		var holdTime = 0,spriteNum = 4,currentSprite = 0;
+
+		var initX = 0,initY = 0;
+
+		var actions = [
+			[[0,0],[-82.5,0],[-165,0],[-247.5,0]], //down
+			[[0,-62.5],[-82.5,-62.5],[-165,-62.5],[-247.5,-62.5]], //left
+			[[0,-125],[-82.5,-125],[-165,-125],[-247.5,-125]], //right
+			[[0,-187.5],[-82.5,-187.5],[-165,-187.5],[-247.5,-187.5]] //up
+			];
+
+		var img;
+
+		function resize(){
+			var winWidth = document.documentElement.clientWidth,
+				winHeight = document.documentElement.clientHeight;
+			stage.setAttribute('width',winWidth);
+			stage.setAttribute('height',winHeight);
+		}
+		window.onresize = resize;
+		resize();
+
+		var render = function(action,actionInx){
+			if(stage.getContext){
+				var ctx = stage.getContext('2d');
+				ctx.clearRect(0, 0, stage.width, stage.height);
+				ctx.drawImage(img,Math.abs(actions[action][actionInx][0]),Math.abs(actions[action][actionInx][1]),82.5,62.5,initX,initY,82.5,62.5);
+			}
+		}
+		window.onload = function(){
+			//图片load
+			img = new Image();
+			img.src = "../images/sprite.png";
+			img.onload = function(){
+				render(0,0);
+				document.body.addEventListener('keydown',function(e){
+					holdTime ++;
+					currentSprite = holdTime % spriteNum;
+					switch(e.keyIdentifier){
+						case 'Right':
+							initX += 5;
+							render(2,currentSprite);
+							break;
+						case 'Up':
+							initY -= 5;
+							render(3,currentSprite);
+							break;
+						case 'Down':
+							initY += 5;
+							render(0,currentSprite);
+							break;
+						case 'Left':
+							initX -= 5;
+							render(1,currentSprite);
+							break;
+					}
+					console.log(e.keyIdentifier);
+				});
+				document.body.addEventListener('keyup',function(e){
+					holdTime = 0;
+				});
+			}
+		}*/
+	</script>
+</body>
+</html>
