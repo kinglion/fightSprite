@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>canvas</title>
+  <style>
+  	*{ margin:0; padding:0;}
+  	.stage { overflow: hidden;}
+  </style>
+</head>
+<body>
+	<div id="stage" class="stage"></div>
+	<script type="text/javascript" src="hilo-standalone.js"></script>
+	<script>
+		window.onload = function(){
+			var direction; //方向
+			var holdTime = 0,spriteNum = 4,currentSprite = 0;;
+			var initX = 0,initY = 0;
+			var canvas = document.getElementById('stage');
+			window.onresize = resize;
+			resize();
+			function resize(){
+				var winWidth = document.documentElement.clientWidth,
+					winHeight = document.documentElement.clientHeight;
+				canvas.style.width = winWidth+'px';
+				canvas.style.height = winHeight+'px';
+			}
+
+			//Hilo
+			var stage = new Hilo.Stage({
+			    renderType:'canvas',
+			    container: canvas,
+			    width: canvas.clientWidth,
+			    height: canvas.clientHeight
+			});
+
+			//定时器刷新
+			var ticker = new Hilo.Ticker(60);
+			ticker.addTick(stage);
+			ticker.start();
+
+			//创建可视对象
+			var playerTexture = new Hilo.TextureAtlas({
+			    image: '../images/sprite.png',
+			    frames: [
+			    	[0,0,82.5,62.5],
+			    	[82.5,0,82.5,62.5],
+			    	[165,0,82.5,62.5],
+			    	[247.5,0,82.5,62.5],
+
+			    	[0,62.5,82.5,62.5],
+			    	[82.5,62.5,82.5,62.5],
+			    	[165,62.5,82.5,62.5],
+			    	[247.5,62.5,82.5,62.5],
+
+			    	[0,125,82.5,62.5],
+			    	[82.5,125,82.5,62.5],
+			    	[165,125,82.5,62.5],
+			    	[247.5,125,82.5,62.5],
+
+			    	[0,187.5,82.5,62.5],
+			    	[82.5,187.5,82.5,62.5],
+			    	[165,187.5,82.5,62.5],
+			    	[247.5,187.5,82.5,62.5]
+		        ],
+		        sprites: {
+		            down: [0, 1, 2, 3],
+		            left: [4, 5, 6, 7],
+		            right: [8, 9, 10, 11],
+		            up: [12, 13, 14, 15]
+		        }
+			});
+
+			//创建人物
+			var Player = Hilo.Class.create({
+			    Extends: Hilo.Sprite,
+			    constructor: function(properties){
+			        Player.superclass.constructor.call(this, properties);
+			        this.atlas = properties.atlas;
+			        //设置人物精灵动画帧
+			        this.addFrame(properties.atlas.getSprite('up'));
+			        this.addFrame(properties.atlas.getSprite('left'));
+			        this.addFrame(properties.atlas.getSprite('right'));
+			        this.addFrame(properties.atlas.getSprite('down'));
+			        //设置人物运动的频率
+			        //this.interval = 10;
+			        //设置人物的中心点位置
+			        this.pivotX = 0;
+			        this.pivotY = 0;
+
+			        //暂停人物精灵动画
+			        this.stop();
+			    },
+			    onUpdate : function(){
+			    	//设置人物精灵动画帧
+			    	console.log(this.atlas.getSprite(direction || 'down'));
+			        this.goto(this.atlas.getSprite(direction || 'down')[currentSprite || 0],true);
+			        this.pivotX = -initX;
+			        this.pivotY = -initY;
+			    }
+			});
+
+			//把人物添加到舞台
+			var PlayerSprite = new Player({
+				atlas : playerTexture
+			}).addTo(stage);
+
+
+			//控制
+			document.body.addEventListener('keydown',function(e){
+				holdTime ++;
+				currentSprite = holdTime % spriteNum;
+				switch(e.keyIdentifier){
+					case 'Right':
+						initX += 5;
+						direction = 'right';
+						break;
+					case 'Up':
+						initY -= 5;
+						direction = 'up';
+						break;
+					case 'Down':
+						initY += 5;
+						direction = 'down';
+						break;
+					case 'Left':
+						initX -= 5;
+						direction = 'left';
+						break;
+				}
+				console.log(e.keyIdentifier);
+			});
+			document.body.addEventListener('keyup',function(e){
+				holdTime = 0;
+			});
+		}
+			
+
+
+
+
+
+		/*var stage = document.getElementById('stage');
+	
+		var holdTime = 0,spriteNum = 4,currentSprite = 0;
+
+		var initX = 0,initY = 0;
+
+		var actions = [
+			[[0,0],[-82.5,0],[-165,0],[-247.5,0]], //down
+			[[0,-62.5],[-82.5,-62.5],[-165,-62.5],[-247.5,-62.5]], //left
+			[[0,-125],[-82.5,-125],[-165,-125],[-247.5,-125]], //right
+			[[0,-187.5],[-82.5,-187.5],[-165,-187.5],[-247.5,-187.5]] //up
+			];
+
+		var img;
+
+		
+		
+
+		var render = function(action,actionInx){
+			if(stage.getContext){
+				var ctx = stage.getContext('2d');
+				ctx.clearRect(0, 0, stage.width, stage.height);
+				ctx.drawImage(img,Math.abs(actions[action][actionInx][0]),Math.abs(actions[action][actionInx][1]),82.5,62.5,initX,initY,82.5,62.5);
+			}
+		}
+		window.onload = function(){
+			//图片load
+			img = new Image();
+			img.src = "../images/sprite.png";
+			img.onload = function(){
+				render(0,0);
+				document.body.addEventListener('keydown',function(e){
+					holdTime ++;
+					currentSprite = holdTime % spriteNum;
+					switch(e.keyIdentifier){
+						case 'Right':
+							initX += 5;
+							render(2,currentSprite);
+							break;
+						case 'Up':
+							initY -= 5;
+							render(3,currentSprite);
+							break;
+						case 'Down':
+							initY += 5;
+							render(0,currentSprite);
+							break;
+						case 'Left':
+							initX -= 5;
+							render(1,currentSprite);
+							break;
+					}
+					console.log(e.keyIdentifier);
+				});
+				document.body.addEventListener('keyup',function(e){
+					holdTime = 0;
+				});
+			}
+		}*/
+	</script>
+</body>
+</html>
